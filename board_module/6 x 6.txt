@@ -1,0 +1,151 @@
+import java.util.*;
+import java.io.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class edit extends Frame implements Runnable,KeyListener
+{
+	int currentFocusedbtn = 0; //Char displayed
+	int numberOfButtons = 36;
+	int start=0,end=0; //row limits array indexing
+	int delay=500;//thread delay
+	Button kbBtn[];
+	Boolean rowSelection = true;//row or letter select
+	int rowSelected =-1;//out of three which
+	TextArea output = new TextArea("",100,10,TextArea.SCROLLBARS_HORIZONTAL_ONLY);//SCROLLBARS_NONE
+	
+        edit()
+	{
+		Thread eachSec = new Thread(this,"ChangeEachSecond");
+		eachSec.setPriority(Thread.MAX_PRIORITY);
+		eachSec.start();
+		kbBtn = new Button[numberOfButtons];
+		this.setSize(330,400);
+		this.setLayout(null);
+		int i,j;
+		for(j=0;j<6;j++)// Button placement
+		{
+			for(i=0;i<6;i++)
+			{
+				int index = i+(j*6);//2D to 1D indexing i=col j=row
+				if(index<=25)
+                                {
+				char btnLabel = (char)(97+index);
+				kbBtn[index] = new Button(Character.toString(btnLabel));
+				kbBtn[index].setFont(new Font("Arial",Font.PLAIN,24));
+				add(kbBtn[index]);
+				kbBtn[index].setBounds((40*(i+1)),40*(j+1)+100,40,40);//Fix pos
+				kbBtn[index].addKeyListener(this);
+                                }
+                                else
+                                {
+                                char btnLabel = (char)(22+index);
+				kbBtn[index] = new Button(Character.toString(btnLabel));
+				kbBtn[index].setFont(new Font("Arial",Font.PLAIN,24));
+				add(kbBtn[index]);
+				kbBtn[index].setBounds((40*(i+1)),40*(j+1)+100,40,40);//Fix pos
+				kbBtn[index].addKeyListener(this);    
+                                }
+			}
+		}
+                
+		
+                output.setEditable(false);//disable normal typing
+		output.setBounds(40,70,240,50);
+		add(output);
+		output.addKeyListener(this);
+		this.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent we){
+				System.exit(0);//Application Exit
+			}
+		});
+	}
+	public void run()
+	{
+		try
+		{
+			
+			while(true)
+			{
+				Thread.sleep(delay);
+				if(rowSelection)
+				{
+					rowSelected=(rowSelected+1)%6;
+					for(int i=start;i<end;i++)
+					{
+						kbBtn[i].setForeground(Color.BLACK);
+					}
+					switch(rowSelected)
+					{
+						case 0:start=0;end=6;break;
+						case 1:start=6;end=12;break;
+						case 2:start=12;end=18;break;
+                                                case 3:start=18;end=24;break;
+                                                case 4:start=24;end=30;break;
+                                                case 5:start=30;end=36;break;
+                                                
+                                                                                                 
+					}
+					for(int i=start;i<end;i++)
+					{
+						kbBtn[i].setForeground(Color.RED);
+					}
+				}
+				else
+				{
+					for(int i=start;i<end;i++)
+					{
+						kbBtn[i].setForeground(Color.BLACK);
+					}
+					if(currentFocusedbtn < (end-1))//row looping
+					{
+						currentFocusedbtn++;
+					}
+					else
+					{
+						currentFocusedbtn=start;//last button in row
+					}
+					kbBtn[currentFocusedbtn].setForeground(Color.RED);
+				}				
+			}
+		}	
+		catch(InterruptedException ie){
+			System.out.println(ie);
+		}
+	}
+	public void keyReleased(KeyEvent e)
+	{
+	}
+	public void keyTyped(KeyEvent e)
+	{}
+	public void keyPressed(KeyEvent e) {
+		if(rowSelection)
+		{
+			switch(rowSelected)
+			{
+                                                case 0:start=0;end=6;break;
+						case 1:start=6;end=12;break;
+						case 2:start=12;end=18;break;
+                                                case 3:start=18;end=24;break;
+                                                case 4:start=24;end=30;break;
+                                                case 5:start=30;end=36;break;
+			}
+			currentFocusedbtn=start;
+			rowSelection=false;
+		}
+		else
+                {
+			if(e.getKeyCode() == 10)
+			{
+				
+				output.append(kbBtn[currentFocusedbtn].getLabel());
+				rowSelection=true;
+				//output.append(kbBtn[currentFocusedbtn].getText());
+			}
+		}
+        }
+	public static void main(String str[])
+	{
+		new edit().setVisible(true);
+	}
+}
